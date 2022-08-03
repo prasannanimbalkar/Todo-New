@@ -1,240 +1,228 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
+import AuthenticationService from "./AuthenticationService.js";
+import LogoutComponent from "./LogoutComponent.js";
+import HeaderComponent from "./HeaderComponent.js";
+import FooterComponent from "./FooterComponent.js";
 import {
-    useNavigate,
-    useParams,
-    BrowserRouter as Router,
-    Route,
-    Routes,
-    Link
+  useNavigate,
+  useParams,
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Link
 } from "react-router-dom";
 
 class TodoApp extends Component {
-    render() {
-        return (
-            <div>
-
-                <Router>
-                    <HeaderComponent/>
-                    <Routes>
-                        <Route path="/" element={<LoginComponentWithNavigation />}/>
-                        <Route path="/login" element={<LoginComponentWithNavigation />}/>
-                        <Route path="/welcome/:name" element={<WelcomeComponentWithParams />}/>
-                        <Route path="/todos" element={<ListTodosComponent />}/>
-                        <Route path="*" element={<ErrorComponent />}/>
-                    </Routes>
-                    <FooterComponent/>
-                </Router>
-
-                {/* <LoginComponent />
-        <WelcomeComponent /> */
-                }
-            </div>
-        );
-    }
-}
-
-function HeaderComponent() {
+  render() {
     return (
-        <> < header > <nav className="navbar navbar-expand-md navbar-dark bg-dark">
-            <div className="navbar-brand">App</div>
-            <ul className="navbar-nav">
-                <li className="nav-link">
-                    <Link to="/welcome/:name">Home</Link>
-                </li>
-                <li className="nav-link">
-                    <Link to="/todos">Todos</Link>
-                </li>
-            </ul>
-            <ul className="navbar-nav navbar-collapse justify-content-end">
-                <li className="nav-link">Login</li>
-                <li className="nav-link">Logout</li>
-            </ul>
-        </nav>
-    </header>
-</>
+      <div>
+        <Router>
+          <HeaderComponent />
+          <Routes>
+            <Route path="/" element={<LoginComponentWithNavigation />} />
+            <Route path="/login" element={<LoginComponentWithNavigation />} />
+            <Route path="/logout" element={<LogoutComponent />} />
+            <Route
+              path="/welcome/:name"
+              element={<WelcomeComponentWithParams />}
+            />
+            <Route path="/todos" element={<ListTodosComponent />} />
+            <Route path="*" element={<ErrorComponent />} />
+          </Routes>
+          <FooterComponent />
+        </Router>
+      </div>
     );
+  }
 }
 
-function FooterComponent() {
-    return (<div>
-        <hr/>
-        Footer
-    </div>);
-}
+
+
+
 
 class LoginComponent extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            username: "Enter Name",
-            password: "default",
-            hasLoginFailed: false,
-            showSuccessMessage: false
-        };
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: "Enter Name",
+      password: "default",
+      hasLoginFailed: false,
+      showSuccessMessage: false
+    };
+  }
+
+  //generic handleChange
+  handleChange = (event) => {
+    console.log(this.state);
+    console.log("called from generic handle");
+    this.setState({
+      [event.target.name]: event.target.value
+    });
+  };
+
+  loginClicked = () => {
+    if (this.state.username === "Admin" && this.state.password === "default") {
+      // this.setState({
+      //   showSuccessMessage: true,
+      //   hasLoginFailed: false
+      // });
+      AuthenticationService.registerSuccessfulLogin(
+        this.state.username,
+        this.state.password
+      );
+      this.props.navigate(`/welcome/${this.state.username}`);
+    } else {
+      this.setState({
+        showSuccessMessage: false,
+        hasLoginFailed: true
+      });
     }
+    console.log(this.state);
+  };
 
-    //generic handleChange
-    handleChange = (event) => {
-        console.log(this.state);
-        console.log("called from generic handle");
-        this.setState({
-            [event.target.name]: event.target.value
-        });
-    };
-
-    loginClicked = () => {
-        if (this.state.username === "Admin" && this.state.password === "default") {
-            // this.setState({   showSuccessMessage: true,   hasLoginFailed: false });
-            this
-                .props
-                .navigate(`/welcome/${this.state.username}`);
-        } else {
-            this.setState({showSuccessMessage: false, hasLoginFailed: true});
-        }
-        console.log(this.state);
-    };
-
-    render() {
-        return (<> < div > {
-            " "
-        }
-        UserName : {
-            " "
-        } < input type = "text" name = "username" value = {
-            this.state.username
-        }
-        // onChange={this.handleUsernameChange}
-        onChange = {
-            this.handleChange
-        } /> </div>
-    <div>
-            {" "}
-        Password : {
-            " "
-        } < input type = "password" name = "password" value = {
-            this.state.password
-        }
-        // onChange={this.handlePasswordChange}
-        onChange = {
-            this.handleChange
-        } /> </div>
-            {/* <ShowInvalidCredentials hasLoginFailed={this.state.hasLoginFailed} /> */
-        } {
-            this.state.hasLoginFailed && <div>Invalid Credentials</div>
-        } {/* <ShowSuccess showSuccessMessage={this.state.showSuccessMessage} /> */
-        } {
-            this.state.showSuccessMessage && <div>Login Success</div>
-        } < button onClick = {
-            this.loginClicked
-        } > Login</button> </>
+  render() {
+    return (
+      <div className="container">
+        <div>
+          {" "}
+          UserName :{" "}
+          <input
+            type="text"
+            name="username"
+            value={this.state.username}
+            // onChange={this.handleUsernameChange}
+            onChange={this.handleChange}
+          />
+        </div>
+        <div>
+          {" "}
+          Password :{" "}
+          <input
+            type="password"
+            name="password"
+            value={this.state.password}
+            // onChange={this.handlePasswordChange}
+            onChange={this.handleChange}
+          />
+        </div>
+        {/* <ShowInvalidCredentials hasLoginFailed={this.state.hasLoginFailed} /> */}
+        {this.state.hasLoginFailed && (
+          <div className="alert alert-warning">Invalid Credentials</div>
+        )}
+        {/* <ShowSuccess showSuccessMessage={this.state.showSuccessMessage} /> */}
+        {this.state.showSuccessMessage && (
+          <div className="alert alert-success">Login Success</div>
+        )}
+        <button className="btn btn-success" onClick={this.loginClicked}>
+          Login
+        </button>
+      </div>
     );
   }
 }
 
 // function ShowInvalidCredentials(props) {
 //   if (props.hasLoginFailed) {
-//     return <div>Invalid Credentials</div >;
-        // } } function ShowSuccess(props) {   if (props.showSuccessMessage) {
-        // return <div>Login Success</div>;   } } welcome username display
-        function withParams(Component) {
-            return(props) => <Component {...props} params={useParams()}/>;
-        }
+//     return <div>Invalid Credentials</div>;
+//   }
+// }
 
-        class WelcomeComponent extends Component {
-            render() {
-                return (
-                    <div>
-                        Welcome {this.props.params.name}. You can manage your Todos
-                        <Link to="/todos">
-                            Here</Link>.
-                    </div>
-                );
-            }
-        }
+// function ShowSuccess(props) {
+//   if (props.showSuccessMessage) {
+//     return <div>Login Success</div>;
+//   }
+// }
 
-        const WelcomeComponentWithParams = withParams(WelcomeComponent);
+//welcome username display
+function withParams(Component) {
+  return (props) => <Component {...props} params={useParams()} />;
+}
 
-        //login Navigation
-        function withNavigation(Component) {
-            return(props) => <Component {...props} navigate={useNavigate()}/>;
-        }
+class WelcomeComponent extends Component {
+  render() {
+    return (
+      <div>
+        Welcome {this.props.params.name}. You can manage your Todos
+        <Link to="/todos"> Here</Link>.
+      </div>
+    );
+  }
+}
 
-        const LoginComponentWithNavigation = withNavigation(LoginComponent);
+const WelcomeComponentWithParams = withParams(WelcomeComponent);
 
-        //error page
-        function ErrorComponent() {
-            return (
-                <div>
-                    An Error Occurred. I don't know what to do! Contact support at abcd-efgh-ijkl
-                </div>
-            );
-        }
+//login Navigation
+function withNavigation(Component) {
+  return (props) => <Component {...props} navigate={useNavigate()} />;
+}
 
-        //List Todos
-        class ListTodosComponent extends Component {
-            constructor(props) {
-                super(props);
-                this.state = {
-                    todos: [
-                        {
-                            id: 1,
-                            description: "Learn React",
-                            done: false,
-                            targetDate: new Date()
-                        }, {
-                            id: 2,
-                            description: "Learn Node",
-                            done: false,
-                            targetDate: new Date()
-                        }, {
-                            id: 3,
-                            description: "Learn DSA",
-                            done: false,
-                            targetDate: new Date()
-                        }
-                    ]
-                };
-            }
+const LoginComponentWithNavigation = withNavigation(LoginComponent);
 
-            render() {
-                return (
-                    <> < h1 > Todos </h1>
-        <table>
-          <thead>
-            <tr>
-              <th>id</th > <th>description</th>
-                    <th>Is Compleated?</th>
-                    <th>Target
-                    </th>
-                </tr>
+//error page
+function ErrorComponent() {
+  return (
+    <div>
+      An Error Occurred. I don't know what to do! Contact support at
+      abcd-efgh-ijkl
+    </div>
+  );
+}
+
+//List Todos
+class ListTodosComponent extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      todos: [
+        {
+          id: 1,
+          description: "Learn React",
+          done: false,
+          targetDate: new Date()
+        },
+        {
+          id: 2,
+          description: "Learn Node",
+          done: false,
+          targetDate: new Date()
+        },
+        { id: 3, description: "Learn DSA", done: false, targetDate: new Date() }
+      ]
+    };
+  }
+
+  render() {
+    return (
+      <>
+        <h1> Todos List </h1>
+        <div className="container">
+          <table className="table">
+            <thead>
+              <tr>
+                {/* <th>id</th> */}
+                <th>description</th>
+                <th>Is Compleated?</th>
+                <th>Target </th>
+              </tr>
             </thead>
             <tbody>
-                        {/* mapping the todos array to display in table using arrow function */
-                    } {
-                        this
-                            .state
-                            .todos
-                            .map((todos) => (
-                                <tr>
-                                    <td>{todos.id}</td>
-                                    <td>{todos.description}</td>
-                                    <td>{
-                                            todos
-                                                .done
-                                                .toString()
-                                        }</td>
-                                    <td>{
-                                            todos
-                                                .targetDate
-                                                .toString()
-                                        }</td>
-                                </tr>
-                            ))
-                    } 
-                    </tbody>
-        </table > </>
-                );
-            }
-        }
+              {/* mapping the todos array to display in table using arrow function */}
+              {this.state.todos.map((todos) => (
+                <tr>
+                  {/* <td>{todos.id}</td> */}
+                  <td>{todos.description}</td>
+                  <td>{todos.done.toString()}</td>
+                  <td>{todos.targetDate.toString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>
+    );
+  }
+}
 
-        export default TodoApp;
+
+
+export default TodoApp;
